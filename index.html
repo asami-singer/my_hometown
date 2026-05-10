@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Title - Artist Name</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .jacket-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .btn {
+            display: block;
+            padding: 15px;
+            margin: 15px 0;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: opacity 0.3s;
+        }
+        .btn-download { background-color: #000; color: #fff; }
+        .btn-linkcore { background-color: #00D4FF; color: #fff; }
+        .btn-sns { background-color: #E1306C; color: #fff; } /* SNS用（例:Instagram色） */
+        .btn:hover { opacity: 0.8; }
+
+        .lyrics-section {
+            margin-top: 40px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .lyrics-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .lyrics-text {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 0.95em;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="jacket_myhometowm.png" alt="Jacket Image" class="jacket-img">
+
+    <h2>My Hometown / もりたかみつ</h2>
+
+    <a href="#" id="dl-link" class="btn btn-download">楽曲をダウンロードする</a>
+
+    <a href="https://linkco.re/5Xg4Yxcn" target="_blank" class="btn btn-linkcore">Linkcoreで聴く</a>
+
+    <a href="https://www.instagram.com/mori.taka.mitsu/" target="_blank" class="btn btn-sns">Official Instagram</a>
+
+    <div class="lyrics-section">
+        <div class="lyrics-title">Lyrics</div>
+        <div class="lyrics-text">
+My home town
+
+けたけたと笑う　晴れ渡る空に　歌声は響く
+つま先を立てて　思い切り伸ばす　青に届くまで
+
+I don't know what to do for ideally life
+ありのままの一歩で
+進む目の前見えた景色が
+愛おしいそれだけで
+
+この街を見つめながら　生きていきたいな
+この街を見つめながら　生きていきたいな
+
+空々と転ぶ　風は頬かすめて　季節を香らせる
+泳ぎ舞う鳥も　小枝に止まれば　風音に揺れる
+
+I don't know what will happen in my life
+この瞬間を感じたい
+もし明日世界が終わるとしたら
+愛する場所に居たい
+
+この街を見つめながら　生きていきたいな
+この街を見つめながら　生きていきたいな
+
+星が瞬いて　月うさぎ跳ねる　フクロウもうたた寝
+四季移り変わり　景色が変われど　変わらない心
+
+この街を愛しながら　生きていきたいな
+この街を愛しながら　生きていきたいな
+Tulu tululu...
+        </div>
+    </div>
+</div>
+
+<script>
+    // URLパラメータから "id" を取得してダウンロードボタンのリンクを生成
+    const urlParams = new URLSearchParams(window.location.search);
+    const serialId = urlParams.get('id');
+    const gasWebappUrl = "https://script.google.com/macros/s/XXX/exec"; // あなたのGASのURL
+
+    if (serialId) {
+        document.getElementById('dl-link').href = gasWebappUrl + "?id=" + serialId;
+    } else {
+        document.getElementById('dl-link').style.display = 'none';
+        alert("シリアルIDが見つかりません。タグをもう一度読み取ってください。");
+    }
+</script>
+
+</body>
+</html>
