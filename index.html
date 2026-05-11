@@ -119,7 +119,7 @@ Tulu tululu...
     // URLパラメータから "id" を取得してダウンロードボタンのリンクを生成
     const urlParams = new URLSearchParams(window.location.search);
     const serialId = urlParams.get('id');
-    const gasWebappUrl = "https://script.google.com/macros/s/AKfycbwl1YnmXKvcrmmF5kvPv1tzwxAshDwk41mk1fb8NXuEkCDUq285RLomIGqtEQVouXcl/exec"; // あなたのGASのURL
+    const gasWebappUrl = "https://script.google.com/macros/s/AKfycby2eKbYMbk-BvvbWSO48lLTY7ja4WgSZpo_SWHM7EbfEUbFmvLE7_-VxNc6Zv1tTpIh/exec"; // あなたのGASのURL
 
     if (serialId) {
         document.getElementById('dl-link').href = gasWebappUrl + "?id=" + serialId;
