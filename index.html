@@ -115,17 +115,51 @@ Oh 駆け抜けてく　Fire Monster
 </div>
 
 <script>
-    // URLパラメータから "id" を取得してダウンロードボタンのリンクを生成
-    const urlParams = new URLSearchParams(window.location.search);
-    const serialId = urlParams.get('id');
-    const gasWebappUrl = "https://script.google.com/macros/s/AKfycbyw2haAaSYgN4pi3hfLMfkjx_7C5_Uo1NbmqtJKxx94aObJDSn1myOS5XB-Ot3gd1H0tw/exec"; // あなたのGASのURL
+    window.onload = function() {
+        // 1. URLパラメータから "id" を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawSerialId = urlParams.get('id');
+        
+        // My Hometown 用の GAS URL（既存のものを維持しています）
+        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbwl1YnmXKvcrmmF5kvPv1tzwxAshDwk41mk1fb8NXuEkCDUq285RLomIGqtEQVouXcl/exec";
+        
+        const dlLink = document.getElementById('dl-link');
+        const countDisplay = document.getElementById('remaining-count');
 
-    if (serialId) {
-        document.getElementById('dl-link').href = gasWebappUrl + "?id=" + serialId;
-    } else {
-        document.getElementById('dl-link').style.display = 'none';
-        alert("シリアルIDが見つかりません。タグをもう一度読み取ってください。");
-    }
+        if (rawSerialId) {
+            const serialId = rawSerialId.trim();
+            const encodedId = encodeURIComponent(serialId);
+
+            // 2. ダウンロード用メインリンクの設定
+            dlLink.href = gasWebappUrl + "?id=" + encodedId;
+
+            // 3. 残り回数をGASへ問い合わせ (mode=check を付与)
+            const checkUrl = gasWebappUrl + "?mode=check&id=" + encodedId;
+            
+            fetch(checkUrl)
+                .then(response => response.text())
+                .then(count => {
+                    // GASから数字が返ってきたら表示を更新
+                    countDisplay.innerText = "ダウンロード残り回数：" + count + "回";
+                    
+                    // 0回以下ならボタンを無効化（グレーアウト）
+                    if (parseInt(count) <= 0) {
+                        dlLink.style.pointerEvents = "none";
+                        dlLink.style.backgroundColor = "#ccc";
+                        dlLink.innerText = "ダウンロード上限に達しました";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    countDisplay.innerText = "回数の取得に失敗しました";
+                });
+        } else {
+            // IDがない場合はボタンと回数表示を非表示にする
+            dlLink.style.display = 'none';
+            countDisplay.style.display = 'none';
+            alert("シリアルIDが見つかりません。タグをもう一度読み取ってください。");
+        }
+    };
 </script>
 
 </body>
