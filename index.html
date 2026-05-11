@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Title - Artist Name</title>
+    <title>My Hometown - もりたかみつ</title>
     <style>
         body {
             font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
@@ -72,6 +72,9 @@
     <h2>My Hometown / もりたかみつ</h2>
 
     <a href="#" id="dl-link" class="btn btn-download">楽曲をダウンロードする</a>
+	<p id="remaining-count" style="font-size: 0.9em; color: #666;">
+	    残りダウンロード回数を確認中...
+	</p>
 
     <a href="https://linkco.re/5Xg4Yxcn" target="_blank" class="btn btn-linkcore">Linkcoreで聴く</a>
 
@@ -80,7 +83,6 @@
     <div class="lyrics-section">
         <div class="lyrics-title">Lyrics</div>
         <div class="lyrics-text">
-
 けたけたと笑う　晴れ渡る空に　歌声は響く
 つま先を立てて　思い切り伸ばす　青に届くまで
 
@@ -117,7 +119,7 @@ Tulu tululu...
     // URLパラメータから "id" を取得してダウンロードボタンのリンクを生成
     const urlParams = new URLSearchParams(window.location.search);
     const serialId = urlParams.get('id');
-    const gasWebappUrl = "https://script.google.com/macros/s/XXX/exec"; // あなたのGASのURL
+    const gasWebappUrl = "https://script.google.com/macros/s/AKfycbwl1YnmXKvcrmmF5kvPv1tzwxAshDwk41mk1fb8NXuEkCDUq285RLomIGqtEQVouXcl/exec"; // あなたのGASのURL
 
     if (serialId) {
         document.getElementById('dl-link').href = gasWebappUrl + "?id=" + serialId;
