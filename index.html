@@ -38,10 +38,21 @@
             border-radius: 30px;
             font-weight: bold;
             transition: opacity 0.3s;
+            /* サイズを統一するための追加設定 */
+            box-sizing: border-box;
+            width: 100%;
+            font-size: 16px;
         }
-        .btn-download { background-color: #000; color: #fff; border: none; width: 100%; font-size: 16px; cursor: pointer; }
+        .btn-download { 
+            background-color: #000; 
+            color: #fff; 
+            border: none; 
+            cursor: pointer;
+            line-height: 1.2; /* ボタン内のテキスト位置調整 */
+        }
         .btn-linkcore { background-color: #00D4FF; color: #fff; }
         .btn-sns { background-color: #E1306C; color: #fff; }
+        
         .btn:hover { opacity: 0.8; }
         .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
@@ -136,8 +147,7 @@ Tulu tululu...
         const urlParams = new URLSearchParams(window.location.search);
         const rawSerialId = urlParams.get('id');
         
-        // 最新のGAS WebアプリURLを確認してください
-        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbw-8n446x_-LHYjQoL0ZgiS8iUDLG6OvQ2J-Yq8hZkj_uth-m9JLQ0O5ZqB9KZvDOIP/exec";
+        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbyfy17D81m-JZGGwv0xshxXVexIm8FVccGru03MescSuo0FWIvw14Op-AO3kmx_MDGB/exec";
         
         const dlLink = document.getElementById('dl-link');
         const countDisplay = document.getElementById('remaining-count');
@@ -146,7 +156,6 @@ Tulu tululu...
             const serialId = rawSerialId.trim();
             const encodedId = encodeURIComponent(serialId);
 
-            // 1. 初回読み込み時に残り回数を確認
             fetch(gasWebappUrl + "?mode=check&id=" + encodedId)
                 .then(response => response.text())
                 .then(count => {
@@ -159,44 +168,9 @@ Tulu tululu...
                     countDisplay.innerText = "回数の取得に失敗しました";
                 });
 
-            // 2. ダウンロードボタンが押された時の処理
             dlLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                
-                const originalText = dlLink.innerText;
-                dlLink.innerText = "準備中...";
-                dlLink.style.pointerEvents = "none";
-                dlLink.style.opacity = "0.6";
-
-                // GASに通信して「ダウンロード用URL」を直接取得する
-                fetch(gasWebappUrl + "?id=" + encodedId)
-                    .then(response => response.text())
-                    .then(result => {
-                        // GASから正しいURL（https://drive...）が返ってきた場合
-                        if (result.startsWith("https://drive.google.com")) {
-                            window.location.href = result;
-                            
-                            // 完了後の処理
-                            setTimeout(() => {
-                                dlLink.innerText = originalText;
-                                dlLink.style.pointerEvents = "auto";
-                                dlLink.style.opacity = "1";
-                                location.reload(); // 回数表示を更新するためにリロード
-                            }, 3000);
-                        } else {
-                            // エラー（上限など）が返ってきた場合
-                            alert("メッセージ: " + result);
-                            dlLink.innerText = originalText;
-                            dlLink.style.pointerEvents = "auto";
-                            dlLink.style.opacity = "1";
-                        }
-                    })
-                    .catch(error => {
-                        alert("通信エラーが発生しました。");
-                        dlLink.innerText = originalText;
-                        dlLink.style.pointerEvents = "auto";
-                        dlLink.style.opacity = "1";
-                    });
+                window.location.href = gasWebappUrl + "?id=" + encodedId;
             });
 
         } else {
