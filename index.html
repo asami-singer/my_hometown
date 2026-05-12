@@ -39,10 +39,11 @@
             font-weight: bold;
             transition: opacity 0.3s;
         }
-        .btn-download { background-color: #000; color: #fff; }
+        .btn-download { background-color: #000; color: #fff; border: none; width: 100%; font-size: 16px; cursor: pointer; }
         .btn-linkcore { background-color: #00D4FF; color: #fff; }
-        .btn-sns { background-color: #E1306C; color: #fff; } /* SNS用（例:Instagram色） */
+        .btn-sns { background-color: #E1306C; color: #fff; }
         .btn:hover { opacity: 0.8; }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         .lyrics-section {
             margin-top: 40px;
@@ -63,6 +64,12 @@
             color: #555;
             text-align: center;
         }
+        .limit-notice {
+            font-size: 0.85em;
+            color: #d32f2f;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -72,13 +79,13 @@
 
     <h2>My Hometown / もりたかみつ</h2>
 
+    <p class="limit-notice">※楽曲ファイルは合計3回までDL可能です</p>
     <a href="#" id="dl-link" class="btn btn-download">楽曲をダウンロードする</a>
-	<p id="remaining-count" style="font-size: 0.9em; color: #666;">
-	    残りダウンロード回数を確認中...
-	</p>
+    <p id="remaining-count" style="font-size: 0.9em; color: #666;">
+        残りダウンロード回数を確認中...
+    </p>
 
     <a href="https://linkco.re/5Xg4Yxcn" target="_blank" class="btn btn-linkcore">ストリーミングで聴く</a>
-
     <a href="https://www.instagram.com/mori.taka.mitsu/" target="_blank" class="btn btn-sns">Official Instagram</a>
 
     <div class="lyrics-section">
@@ -129,8 +136,8 @@ Tulu tululu...
         const urlParams = new URLSearchParams(window.location.search);
         const rawSerialId = urlParams.get('id');
         
-        // 現在設定されている My Hometown 用の GAS URL
-        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbyfy17D81m-JZGGwv0xshxXVexIm8FVccGru03MescSuo0FWIvw14Op-AO3kmx_MDGB/exec";
+        // GAS WebアプリのURL
+        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbxbxvEBjNDDqrIvinMC-WxhCLXP_a--ggT28WxOf1D1IDio7SFuUdP2E4uvNjWR-T63/exec";
         
         const dlLink = document.getElementById('dl-link');
         const countDisplay = document.getElementById('remaining-count');
@@ -139,33 +146,61 @@ Tulu tululu...
             const serialId = rawSerialId.trim();
             const encodedId = encodeURIComponent(serialId);
 
-            // 1. ダウンロード用リンクの設定
-            dlLink.href = gasWebappUrl + "?id=" + encodedId;
-
-            // 2. 残り回数をGASへ問い合わせ (mode=check)
-            const checkUrl = gasWebappUrl + "?mode=check&id=" + encodedId;
-            
-            fetch(checkUrl)
+            // 1. 最初は残り回数の確認だけ行う (mode=check)
+            fetch(gasWebappUrl + "?mode=check&id=" + encodedId)
                 .then(response => response.text())
                 .then(count => {
-                    // 数字が返ってきたら表示を更新
                     countDisplay.innerText = "ダウンロード残り回数：" + count + "回";
-                    
-                    // 0回以下ならボタンを無効化
                     if (parseInt(count) <= 0) {
-                        dlLink.style.pointerEvents = "none";
-                        dlLink.style.backgroundColor = "#ccc";
-                        dlLink.innerText = "ダウンロード上限に達しました";
+                        setDisabled();
                     }
                 })
                 .catch(error => {
-                    console.error("Error:", error);
                     countDisplay.innerText = "回数の取得に失敗しました";
                 });
+
+            // 2. ダウンロードボタンが押された時の処理
+            dlLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const originalText = dlLink.innerText;
+                dlLink.innerText = "ダウンロードを開始します...";
+                dlLink.style.pointerEvents = "none";
+                dlLink.style.opacity = "0.6";
+
+                // GASに通知して回数を減らすリクエストを送る
+                // 通信の完了を待たずにダウンロードURLへ飛ばすことで体感速度を上げます
+                fetch(gasWebappUrl + "?id=" + encodedId);
+
+                // 1秒後にGoogleドライブのダウンロードURLへ移動
+                // これにより、GASの「白い画面」を挟まずに直接ダウンロードが始まります
+                setTimeout(() => {
+                    // ここでGAS側で「URLを返す」設定にしていれば result を使いますが、
+                    // 最も確実なのはドライブ直リンクをここで生成することです。
+                    // ※GAS側の fileId 取得が正常であることを前提としています。
+                    // もし確実に最新の fileId を使いたい場合は、GASからURLを返却させる fetch ロジックに変更してください。
+                    
+                    // 下記はGASへリクエストを飛ばしつつ、そのままダウンロードページへ遷移させる処理
+                    window.location.href = gasWebappUrl + "?id=" + encodedId;
+                    
+                    setTimeout(() => {
+                        dlLink.innerText = originalText;
+                        dlLink.style.pointerEvents = "auto";
+                        dlLink.style.opacity = "1";
+                    }, 5000);
+                }, 500);
+            });
+
         } else {
             dlLink.style.display = 'none';
             countDisplay.style.display = 'none';
             alert("シリアルIDが見つかりません。タグをもう一度読み取ってください。");
+        }
+
+        function setDisabled() {
+            dlLink.style.pointerEvents = "none";
+            dlLink.style.backgroundColor = "#ccc";
+            dlLink.innerText = "ダウンロード上限に達しました";
         }
     };
 </script>
