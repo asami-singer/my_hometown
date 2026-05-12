@@ -136,8 +136,8 @@ Tulu tululu...
         const urlParams = new URLSearchParams(window.location.search);
         const rawSerialId = urlParams.get('id');
         
-        // GAS WebアプリのURL
-        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbxbxvEBjNDDqrIvinMC-WxhCLXP_a--ggT28WxOf1D1IDio7SFuUdP2E4uvNjWR-T63/exec";
+        // 最新のGAS WebアプリURLを確認してください
+        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbxO7SABGbMWwDUXiFOpOwGFe2iGz-h9L52at8qNPH_yrNzdsP2yb9RiNjRbo9agbSMu/exec";
         
         const dlLink = document.getElementById('dl-link');
         const countDisplay = document.getElementById('remaining-count');
@@ -146,7 +146,7 @@ Tulu tululu...
             const serialId = rawSerialId.trim();
             const encodedId = encodeURIComponent(serialId);
 
-            // 1. 最初は残り回数の確認だけ行う (mode=check)
+            // 1. 初回読み込み時に残り回数を確認
             fetch(gasWebappUrl + "?mode=check&id=" + encodedId)
                 .then(response => response.text())
                 .then(count => {
@@ -164,31 +164,39 @@ Tulu tululu...
                 e.preventDefault();
                 
                 const originalText = dlLink.innerText;
-                dlLink.innerText = "ダウンロードを開始します...";
+                dlLink.innerText = "準備中...";
                 dlLink.style.pointerEvents = "none";
                 dlLink.style.opacity = "0.6";
 
-                // GASに通知して回数を減らすリクエストを送る
-                // 通信の完了を待たずにダウンロードURLへ飛ばすことで体感速度を上げます
-                fetch(gasWebappUrl + "?id=" + encodedId);
-
-                // 1秒後にGoogleドライブのダウンロードURLへ移動
-                // これにより、GASの「白い画面」を挟まずに直接ダウンロードが始まります
-                setTimeout(() => {
-                    // ここでGAS側で「URLを返す」設定にしていれば result を使いますが、
-                    // 最も確実なのはドライブ直リンクをここで生成することです。
-                    // ※GAS側の fileId 取得が正常であることを前提としています。
-                    // もし確実に最新の fileId を使いたい場合は、GASからURLを返却させる fetch ロジックに変更してください。
-                    
-                    // 下記はGASへリクエストを飛ばしつつ、そのままダウンロードページへ遷移させる処理
-                    window.location.href = gasWebappUrl + "?id=" + encodedId;
-                    
-                    setTimeout(() => {
+                // GASに通信して「ダウンロード用URL」を直接取得する
+                fetch(gasWebappUrl + "?id=" + encodedId)
+                    .then(response => response.text())
+                    .then(result => {
+                        // GASから正しいURL（https://drive...）が返ってきた場合
+                        if (result.startsWith("https://drive.google.com")) {
+                            window.location.href = result;
+                            
+                            // 完了後の処理
+                            setTimeout(() => {
+                                dlLink.innerText = originalText;
+                                dlLink.style.pointerEvents = "auto";
+                                dlLink.style.opacity = "1";
+                                location.reload(); // 回数表示を更新するためにリロード
+                            }, 3000);
+                        } else {
+                            // エラー（上限など）が返ってきた場合
+                            alert("メッセージ: " + result);
+                            dlLink.innerText = originalText;
+                            dlLink.style.pointerEvents = "auto";
+                            dlLink.style.opacity = "1";
+                        }
+                    })
+                    .catch(error => {
+                        alert("通信エラーが発生しました。");
                         dlLink.innerText = originalText;
                         dlLink.style.pointerEvents = "auto";
                         dlLink.style.opacity = "1";
-                    }, 5000);
-                }, 500);
+                    });
             });
 
         } else {
