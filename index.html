@@ -147,7 +147,8 @@ Tulu tululu...
         const urlParams = new URLSearchParams(window.location.search);
         const rawSerialId = urlParams.get('id');
         
-        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbzLvQMaSkGQjmrhcXeGsB5xibYMBGNXn3xD9YHw6RFNBTS4PbfsfL5wR9QGEVWwXN7_/exec";
+        // 最新のGAS URLであることを確認
+        const gasWebappUrl = "https://script.google.com/macros/s/AKfycbyfy17D81m-JZGGwv0xshxXVexIm8FVccGru03MescSuo0FWIvw14Op-AO3kmx_MDGB/exec";
         
         const dlLink = document.getElementById('dl-link');
         const countDisplay = document.getElementById('remaining-count');
@@ -156,6 +157,7 @@ Tulu tululu...
             const serialId = rawSerialId.trim();
             const encodedId = encodeURIComponent(serialId);
 
+            // 1. 回数確認
             fetch(gasWebappUrl + "?mode=check&id=" + encodedId)
                 .then(response => response.text())
                 .then(count => {
@@ -168,9 +170,10 @@ Tulu tululu...
                     countDisplay.innerText = "回数の取得に失敗しました";
                 });
 
-            dlLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = gasWebappUrl + "?id=" + encodedId;
+            // 2. ボタンクリック時の挙動を「直接ジャンプ」に変更
+            dlLink.addEventListener('click', function() {
+                // hrefを直接GASのURLに書き換える（これで確実に移動します）
+                dlLink.href = gasWebappUrl + "?id=" + encodedId;
             });
 
         } else {
@@ -183,6 +186,7 @@ Tulu tululu...
             dlLink.style.pointerEvents = "none";
             dlLink.style.backgroundColor = "#ccc";
             dlLink.innerText = "ダウンロード上限に達しました";
+            dlLink.href = "javascript:void(0)";
         }
     };
 </script>
