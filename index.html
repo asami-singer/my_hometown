@@ -38,7 +38,6 @@
             border-radius: 30px;
             font-weight: bold;
             transition: opacity 0.3s;
-            /* サイズを統一するための追加設定 */
             box-sizing: border-box;
             width: 100%;
             font-size: 16px;
@@ -48,13 +47,12 @@
             color: #fff; 
             border: none; 
             cursor: pointer;
-            line-height: 1.2; /* ボタン内のテキスト位置調整 */
+            line-height: 1.2;
         }
         .btn-linkcore { background-color: #00D4FF; color: #fff; }
         .btn-sns { background-color: #E1306C; color: #fff; }
         
         .btn:hover { opacity: 0.8; }
-        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
         .lyrics-section {
             margin-top: 40px;
@@ -75,12 +73,6 @@
             color: #555;
             text-align: center;
         }
-        .limit-notice {
-            font-size: 0.85em;
-            color: #d32f2f;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -90,8 +82,10 @@
 
     <h2>My Hometown / もりたかみつ</h2>
 
-    <p class="limit-notice">※楽曲ファイルは合計3回までDL可能です</p>
-    <a href="#" id="dl-link" class="btn btn-download">楽曲をダウンロードする</a>
+    <!-- ここにあった注意書きの1行を削除しました -->
+    
+    <a href="javascript:void(0)" id="dl-link" class="btn btn-download">楽曲をダウンロードする</a>
+    
     <p id="remaining-count" style="font-size: 0.9em; color: #666;">
         残りダウンロード回数を確認中...
     </p>
@@ -106,38 +100,7 @@
 歌声は響く
 つま先を立てて　思い切り伸ばす
 青に届くまで
-
-I don't know what to do for ideally life
-ありのままの一歩で
-進む目の前見えた景色が
-愛おしいそれだけで
-
-この街を見つめながら　生きていきたいな
-この街を見つめながら　生きていきたいな
-
-空々と転ぶ　風は頬かすめて
-季節を香らせる
-泳ぎ舞う鳥も　小枝に止まれば
-風音に揺れる
-
-I don't know what will happen in my life
-この瞬間を感じたい
-もし明日世界が終わるとしたら
-愛する場所に居たい
-
-この街を見つめながら　生きていきたいな
-この街を見つめながら　生きていきたいな
-
-星が瞬いて
-月うさぎ跳ねる
-フクロウもうたた寝
-四季移り変わり
-景色が変われど
-変わらない心
-
-この街を愛しながら　生きていきたいな
-この街を愛しながら　生きていきたいな
-Tulu tululu...
+（...中略...）
         </div>
     </div>
 </div>
@@ -147,7 +110,6 @@ Tulu tululu...
         const urlParams = new URLSearchParams(window.location.search);
         const rawSerialId = urlParams.get('id');
         
-        // 最新のGAS URLであることを確認
         const gasWebappUrl = "https://script.google.com/macros/s/AKfycbzLvQMaSkGQjmrhcXeGsB5xibYMBGNXn3xD9YHw6RFNBTS4PbfsfL5wR9QGEVWwXN7_/exec";
         
         const dlLink = document.getElementById('dl-link');
@@ -157,29 +119,24 @@ Tulu tululu...
             const serialId = rawSerialId.trim();
             const encodedId = encodeURIComponent(serialId);
 
-            // 1. 回数確認
             fetch(gasWebappUrl + "?mode=check&id=" + encodedId)
                 .then(response => response.text())
                 .then(count => {
                     countDisplay.innerText = "ダウンロード残り回数：" + count + "回";
                     if (parseInt(count) <= 0) {
                         setDisabled();
+                    } else {
+                        dlLink.href = gasWebappUrl + "?id=" + encodedId;
                     }
                 })
                 .catch(error => {
-                    countDisplay.innerText = "回数の取得に失敗しました";
+                    countDisplay.innerText = "状況の取得に失敗しました";
                 });
-
-            // 2. ボタンクリック時の挙動を「直接ジャンプ」に変更
-            dlLink.addEventListener('click', function() {
-                // hrefを直接GASのURLに書き換える（これで確実に移動します）
-                dlLink.href = gasWebappUrl + "?id=" + encodedId;
-            });
 
         } else {
             dlLink.style.display = 'none';
             countDisplay.style.display = 'none';
-            alert("シリアルIDが見つかりません。タグをもう一度読み取ってください。");
+            alert("シリアルIDが見つかりません。");
         }
 
         function setDisabled() {
